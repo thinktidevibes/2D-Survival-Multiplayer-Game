@@ -1,0 +1,77 @@
+.draggableItem {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* For quantity */
+  cursor: grab;
+  user-select: none;
+  box-sizing: border-box;
+  /* Add transition for opacity feedback */
+  transition: opacity 0.15s ease-out;
+}
+
+.draggableItem:active {
+  cursor: grabbing; /* Restore active cursor */
+}
+
+.itemImage {
+  width: 75%;
+  height: 75%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none; /* Prevent image interfering with drag */
+}
+
+.itemQuantity {
+  position: absolute;
+  bottom: 2px;
+  left: 4px;
+  font-size: 10px;
+  font-family: 'Press Start 2P', cursive; /* Match UI font */
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 1px 4px;
+  border-radius: 3px;
+  user-select: none;
+  pointer-events: none;
+  z-index: 1; /* Above image */
+}
+
+/* Ghost element styles */
+.dragGhost {
+  position: fixed;
+  pointer-events: none; /* Ghost shouldn't interfere with drop targets */
+  z-index: 9999; /* Above everything else */
+  width: 50px; /* Slightly smaller ghost */
+  height: 50px;
+  background-color: rgba(60, 60, 80, 0.7);
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.9;
+}
+
+.ghostQuantity {
+  position: absolute;
+  bottom: -4px; /* Position relative to ghost */
+  right: -4px;
+  font-size: 10px;
+  font-family: 'Press Start 2P', cursive;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.95);
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 1px 4px;
+  border-radius: 3px;
+  user-select: none;
+}
+
+/* Add a new class for visual feedback DURING drag */
+.isDraggingFeedback {
+  opacity: 0.5; /* Apply opacity via class */
+  pointer-events: none; /* Make the original item invisible to pointer during drag */
+} 

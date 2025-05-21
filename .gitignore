@@ -1,0 +1,87 @@
+# Dependency directories
+node_modules/
+/.pnp
+.pnp.js
+
+# Rust
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# Build outputs
+/dist/
+/build/
+/out/
+
+# Vite
+/.vite/
+
+# SpacetimeDB
+.spacetime/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# SpacetimeDB server configuration (may contain secrets or placeholders)
+server.config.yml
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# TypeScript
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Editor and OS files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Testing
+/coverage/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Production
+/dist-ssr/
+
+# Miscellaneous
+*.local
+
+# Ignore sensitive keys
+/keys/
+/keys/*.pem
+
+# Ignore runtime user data
+/data/
+
+# Node.js / Dependency stuff
+/node_modules/
+
+# Build output (if any)
+/dist/
+
+# Log files (if any)
+*.log

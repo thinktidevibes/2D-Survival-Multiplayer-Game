@@ -1,0 +1,90 @@
+/* Add rule for body to remove default margin */
+body {
+  margin: 0;
+  overflow: hidden; /* Prevent body scrollbars */
+}
+
+.App {
+  text-align: center;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Ensure App doesn't overflow */
+}
+
+.error-message {
+  color: #d32f2f;
+  background-color: #ffebee;
+  padding: 10px;
+  margin-bottom: 20px;
+  border-radius: 4px;
+  border: 1px solid #ffcdd2;
+}
+
+.login-container {
+  max-width: 400px;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.login-container input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.login-container button {
+  width: 100%;
+  padding: 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.login-container button:hover {
+  background-color: #45a049;
+}
+
+.login-container button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.game-container {
+  margin: 0;
+  padding: 0; 
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center;    /* Center vertically */
+  overflow: hidden; 
+  background-color: #000000; /* Black background for letter/pillarboxing */
+}
+
+canvas {
+  display: block; 
+  /* Scale down if needed, maintaining aspect ratio */
+  max-width: 100%; 
+  max-height: 100%;
+  /* Remove width/height: 100% if present */
+  /* width: 100%; */
+  /* height: 100%; */
+  margin: 0; /* Remove default margins */
+  border: none; /* Remove default borders */
+  /* Background color here is less relevant if container fills */
+  /* background-color: #f0f0f0; */
+  object-fit: contain; /* Optional: Another way to hint scaling behavior */
+}
