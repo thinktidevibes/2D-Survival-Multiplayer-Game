@@ -1,10 +1,14 @@
-import { Campfire } from '../../generated'; // Import generated Campfire type
-import campfireImage from '../../assets/doodads/campfire.png'; // Direct import ON
-import campfireOffImage from '../../assets/doodads/campfire_off.png'; // Direct import OFF
+import { Campfire } from '../../generated'; // Import generated types
+import campfireImage from '../../assets/doodads/campfire.png'; // Import campfire image
+import campfireOffImage from '../../assets/doodads/campfire_off.png'; // Import campfire off image
+import { drawDynamicGroundShadow, applyStandardDropShadow } from './shadowUtils'; // Import shadow utils
 import { GroundEntityConfig, renderConfiguredGroundEntity } from './genericGroundRenderer'; // Import generic renderer
-import { drawDynamicGroundShadow, applyStandardDropShadow } from './shadowUtils'; // Added applyStandardDropShadow back
 import { imageManager } from './imageManager'; // Import image manager
-import { Campfire as SpacetimeDBCampfire, Player as SpacetimeDBPlayer } from '../../generated';
+
+// Define constants for campfire rendering
+const CAMPFIRE_FLICKER_AMOUNT = 0.05; // Amount of flicker (0.0 - 1.0)
+const CAMPFIRE_LIGHT_INNER_COLOR = 'rgba(255, 200, 100, 0.8)'; // Inner glow color (warm yellow)
+const CAMPFIRE_LIGHT_OUTER_COLOR = 'rgba(255, 100, 50, 0.4)'; // Outer glow color (orange-red)
 
 // --- Constants directly used by this module or exported ---
 export const CAMPFIRE_WIDTH = 64;

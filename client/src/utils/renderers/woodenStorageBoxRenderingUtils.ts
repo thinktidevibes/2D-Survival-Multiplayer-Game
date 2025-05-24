@@ -25,7 +25,7 @@ const boxConfig: GroundEntityConfig<WoodenStorageBox> = {
         return boxImage;
     },
 
-    getTargetDimensions: (img, _entity) => ({
+    getTargetDimensions: (_img, _entity) => ({
         width: BOX_WIDTH,
         height: BOX_HEIGHT,
     }),
@@ -37,7 +37,7 @@ const boxConfig: GroundEntityConfig<WoodenStorageBox> = {
 
     getShadowParams: undefined,
 
-    applyEffects: (ctx, entity, nowMs, baseDrawX, baseDrawY, cycleProgress) => {
+    applyEffects: (ctx, entity, nowMs, _baseDrawX, _baseDrawY, cycleProgress) => {
         // Apply shadow if not destroyed
         if (!entity.isDestroyed) {
             applyStandardDropShadow(ctx, { cycleProgress, blur: 4, offsetY: 3 }); 
@@ -63,7 +63,7 @@ const boxConfig: GroundEntityConfig<WoodenStorageBox> = {
         };
     },
 
-    drawOverlay: (ctx, entity, finalDrawX, finalDrawY, finalDrawWidth, finalDrawHeight, nowMs, baseDrawX, baseDrawY) => {
+    drawOverlay: (ctx, entity, finalDrawX, finalDrawY, finalDrawWidth, _finalDrawHeight, nowMs, _baseDrawX, _baseDrawY) => {
         if (entity.isDestroyed) {
             return;
         }

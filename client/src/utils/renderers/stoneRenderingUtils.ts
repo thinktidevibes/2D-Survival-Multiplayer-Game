@@ -1,13 +1,18 @@
-import { Stone } from '../../generated'; // Import generated Stone type
+import { Stone } from '../../generated'; // Import generated types
+import { GroundEntityConfig, renderConfiguredGroundEntity } from './genericGroundRenderer'; // Import generic renderer
+import { imageManager } from './imageManager'; // Import image manager
 import stoneImage from '../../assets/doodads/stone.png'; // Direct import
 import { drawDynamicGroundShadow } from './shadowUtils'; // Import new ground shadow util
-import { GroundEntityConfig, renderConfiguredGroundEntity } from './genericGroundRenderer';
-import { imageManager } from './imageManager';
 
 // Configuration constants
 const TARGET_STONE_WIDTH_PX = 120; // Target width on screen
 const SHAKE_DURATION_MS = 150;     // How long the shake effect lasts
 const SHAKE_INTENSITY_PX = 10;    // Max pixel offset for shake
+
+// Define constants for stone rendering
+const STONE_OPACITY = 0.9; // Base opacity for stones
+const STONE_HIGHLIGHT_COLOR = 'rgba(255, 255, 255, 0.3)'; // Highlight color for stones
+const STONE_HIGHLIGHT_THICKNESS = 2; // Thickness of highlight border
 
 // Define the configuration for rendering stones
 const stoneConfig: GroundEntityConfig<Stone> = {

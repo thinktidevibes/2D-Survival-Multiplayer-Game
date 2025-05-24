@@ -38,13 +38,13 @@ const CLIENT_ID   = 'vibe-survival-game-client';
 
 // Load the private key for signing JWTs
 let privateKey: string;
-let jwksPublicKey: jose.KeyLike; // Store public key in jose format
+let jwksPublicKey: jose.KeyObject; // Changed from KeyLike to KeyObject
 let jwksPublicJWK: jose.JWK;     // Store public key as plain JWK object
 const keyId = 'auth-server-signing-key'; // An identifier for our key
 
 try {
-    privateKey = fsSync.readFileSync(path.resolve(__dirname, '../keys/private.pem'), 'utf8');
-    const publicKeyPem = fsSync.readFileSync(path.resolve(__dirname, '../keys/public.pem'), 'utf8');
+    privateKey = fsSync.readFileSync(path.resolve(__dirname, '/keys/private.pem'), 'utf8');
+    const publicKeyPem = fsSync.readFileSync(path.resolve(__dirname, '/keys/public.pem'), 'utf8');
     // Import public key for JWKS endpoint using jose
     jwksPublicKey = await jose.importSPKI(publicKeyPem, 'RS256');
     // Export to JWK format for the response body
@@ -237,7 +237,7 @@ async function success(ctx: any, value: any): Promise<Response> {
   // --- CORS Middleware --- 
   // Allow requests from your client origins
   app.use('*', cors({ 
-      origin: ['http://localhost:3008', 'http://localhost:3009'], // Allow both client ports
+      origin: ['http://localhost', 'http://localhost:80', 'http://localhost:3008', 'http://localhost:3009'], // Added localhost and localhost:80
       allowMethods: ['GET', 'POST', 'OPTIONS'], // Allow needed methods
       allowHeaders: ['Content-Type', 'Authorization'], // Allow needed headers (adjust if necessary)
       credentials: true, // Allow cookies/credentials if needed later
@@ -286,13 +286,14 @@ async function success(ctx: any, value: any): Promise<Response> {
           // Handle password flow manually: Redirect to our custom login page
           console.log('[AuthServer] Intercepting /authorize for password flow (acr_values=pwd). Redirecting to /auth/password/login');
           
-          // Forward all original OIDC query parameters
-          const loginUrl = new URL('/auth/password/login', ISSUER_URL); 
+          // Use relative URL for redirect
+          const loginUrl = new URL('/auth/password/login', 'http://localhost'); 
           Object.keys(query).forEach(key => {
               loginUrl.searchParams.set(key, query[key]);
           });
           
-          return c.redirect(loginUrl.toString(), 302);
+          // Extract just the path and query string for the redirect
+          return c.redirect(loginUrl.pathname + loginUrl.search, 302);
       } else {
           // For any other flow (or if acr_values is missing), let the issuer handle it.
           console.log('[AuthServer] /authorize request is not for password flow (acr_values != \'pwd\') or acr_values missing. Passing to issuer.');
@@ -552,7 +553,13 @@ async function success(ctx: any, value: any): Promise<Response> {
         <title>Login</title>
         <!-- <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"> -->
         <style>
-            body { display: flex; justify-content: center; align-items: center; min-height: 100vh; width: 100%; margin: 0; background-color: #1a1a2e; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; color: white; }\n            .container { background-color: rgba(40, 40, 60, 0.85); padding: 40px; border-radius: 4px; border: 1px solid #a0a0c0; box-shadow: 2px 2px 0px rgba(0,0,0,0.5); text-align: center; min-width: 400px; max-width: 500px; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }\n            .logo-text { font-size: 24px; margin-bottom: 10px; color: #e0e0e0; }\n            .subtitle { font-size: 14px; margin-bottom: 30px; color: #b0b0c0; }\n            h1 { margin-bottom: 25px; font-weight: normal; font-size: 20px; }\n            label { display: block; margin-bottom: 8px; font-size: 12px; text-align: left; color: #d0d0d0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }\n            input[type="email"], input[type="password"] { padding: 10px; margin-bottom: 20px; border: 1px solid #a0a0c0; background-color: #333; color: white; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; font-size: 14px; display: block; width: calc(100% - 22px); text-align: center; box-sizing: border-box; border-radius: 2px; }\n            button[type="submit"] { padding: 12px 20px; border: 1px solid #a0a0c0; background-color: #777; color: white; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; font-size: 14px; cursor: pointer; box-shadow: 2px 2px 0px rgba(0,0,0,0.5); /* width: 100%; */ display: inline-block; box-sizing: border-box; margin-bottom: 20px; text-transform: uppercase; border-radius: 2px; }\n            button[type="submit"]:hover { background-color: #888; }\n            .form-link { font-size: 12px; color: #ccc; }\n            .form-link a { color: #fff; text-decoration: underline; }\n            .form-link a:hover { color: #a0a0c0; }\n            hr { border: none; border-top: 1px solid #555; margin-top: 25px; margin-bottom: 25px; }\n        </style>\n    </head>\n    <body>\n        <div class="container">\n            <div class="logo-text">${githubLogoPlaceholder}</div>\n            <div class="subtitle">2D Survival Multiplayer</div>\n            <h1>Login</h1>\n            <form method="post">\n                <input type="hidden" name="redirect_uri" value="${encodeURIComponent(redirect_uri)}">\n                <input type="hidden" name="state" value="${state || ''}">\n                <input type="hidden" name="code_challenge" value="${code_challenge}">\n                <input type="hidden" name="code_challenge_method" value="${code_challenge_method}">\n                <input type="hidden" name="client_id" value="${client_id}">\n                <div>\n                    <label for="email">Email:</label>\n                    <input id="email" name="email" type="email" required>\n                </div>\n                <div>\n                    <label for="password">Password:</label>\n                    <input id="password" name="password" type="password" required>\n                </div>\n                <button type="submit">Login</button>\n            </form>\n            <hr>\n            <p class="form-link">Don\'t have an account? <a href="/auth/password/register?${queryString}">Register</a></p>\n        </div>\n    </body>\n    </html>\n    `);
+            body { display: flex; justify-content: center; align-items: center; min-height: 100vh; width: 100%; margin: 0; background-color: #1a1a2e; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; color: white; }\n            .container { background-color: rgba(40, 40, 60, 0.85); padding: 40px; border-radius: 4px; border: 1px solid #a0a0c0; box-shadow: 2px 2px 0px rgba(0,0,0,0.5); text-align: center; min-width: 400px; max-width: 500px; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }\n            .logo-text { font-size: 24px; margin-bottom: 10px; color: #e0e0e0; }\n            .subtitle { font-size: 14px; margin-bottom: 30px; color: #b0b0c0; }\n            h1 { margin-bottom: 25px; font-weight: normal; font-size: 20px; }\n            label { display: block; margin-bottom: 8px; font-size: 12px; text-align: left; color: #d0d0d0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }\n            input[type="email"], input[type="password"] { padding: 10px; margin-bottom: 20px; border: 1px solid #a0a0c0; background-color: #333; color: white; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; font-size: 14px; display: block; width: calc(100% - 22px); text-align: center; box-sizing: border-box; border-radius: 2px; }\n            button[type="submit"] { padding: 12px 20px; border: 1px solid #a0a0c0; background-color: #777; color: white; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; font-size: 14px; cursor: pointer; box-shadow: 2px 2px 0px rgba(0,0,0,0.5); /* width: 100%; */ display: inline-block; box-sizing: border-box; margin-bottom: 20px; text-transform: uppercase; border-radius: 2px; }\n            button[type="submit"]:hover { background-color: #888; }\n            .form-link { font-size: 12px; color: #ccc; }\n            .form-link a { color: #fff; text-decoration: underline; }\n            .form-link a:hover { color: #a0a0c0; }\n            hr { border: none; border-top: 1px solid #555; margin-top: 25px; margin-bottom: 25px; }\n        </style>\n    </head>\n    <body>\n        <div class="container">\n            <div class="logo-text">${githubLogoPlaceholder}</div>\n            <div class="subtitle">2D Survival Multiplayer</div>\n            <h1>Login</h1>\n            <form method="post">
+                <input type="hidden" name="redirect_uri" value="${encodeURIComponent(redirect_uri)}">
+                <input type="hidden" name="state" value="${state || ''}">
+                <input type="hidden" name="code_challenge" value="${code_challenge}">
+                <input type="hidden" name="code_challenge_method" value="${code_challenge_method}">
+                <input type="hidden" name="client_id" value="${client_id}">
+                <div>\n                    <label for="email">Email:</label>\n                    <input id="email" name="email" type="email" required>\n                </div>\n                <div>\n                    <label for="password">Password:</label>\n                    <input id="password" name="password" type="password" required>\n                </div>\n                <button type="submit">Login</button>\n            </form>\n            <hr>\n            <p class="form-link">Don\'t have an account? <a href="/auth/password/register?${queryString}">Register</a></p>\n        </div>\n    </body>\n    </html>\n    `);
   });
   
   app.post('/auth/password/login', async (c) => {
@@ -709,6 +716,22 @@ async function success(ctx: any, value: any): Promise<Response> {
         token_type: 'Bearer', 
         expires_in: expiresInSeconds 
     });
+  });
+
+  // Add a mirror of the token endpoint at /auth/token for nginx proxy
+  app.post('/auth/token', async c => {
+    // Forward to the main token endpoint
+    const headers = new Headers();
+    const headerObj = c.req.header();
+    Object.entries(headerObj).forEach(([key, value]) => {
+      if (value) headers.set(key, value);
+    });
+    
+    return app.fetch(new Request(`${ISSUER_URL}/token`, {
+      method: 'POST',
+      headers,
+      body: await c.req.text()
+    }));
   });
 
   // Mount the OpenAuth issuer routes AFTER your manual routes AND the interceptor

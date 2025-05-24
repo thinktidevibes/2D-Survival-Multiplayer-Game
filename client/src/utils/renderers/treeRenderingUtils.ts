@@ -5,7 +5,6 @@ import downyOakImage from '../../assets/doodads/downy_oak.png';
 // import treeOakImage from '../assets/doodads/tree.png'; // REMOVED
 // import treeStumpImage from '../assets/doodads/tree_stump.png'; // REMOVED
 import { drawDynamicGroundShadow } from './shadowUtils'; // Import new ground shadow util
-import { applyStandardDropShadow } from './shadowUtils'; // Import new shadow util
 import { GroundEntityConfig, renderConfiguredGroundEntity } from './genericGroundRenderer'; // Import generic renderer
 import { imageManager } from './imageManager'; // Import image manager
 

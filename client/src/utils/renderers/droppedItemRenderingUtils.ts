@@ -1,8 +1,14 @@
+import { DroppedItem } from '../../generated'; // Import generated types
+import { GroundEntityConfig, renderConfiguredGroundEntity } from './genericGroundRenderer'; // Import generic renderer
+import { imageManager } from './imageManager'; // Import image manager
 import { DroppedItem as SpacetimeDBDroppedItem, ItemDefinition as SpacetimeDBItemDefinition } from '../../generated';
 import burlapSackImage from '../../assets/doodads/burlap_sack.png'; // Import the sack image
-import { GroundEntityConfig, renderConfiguredGroundEntity } from './genericGroundRenderer';
-import { imageManager } from './imageManager'; 
 import { applyStandardDropShadow } from './shadowUtils'; // Added import
+
+// Define constants for dropped item rendering
+const DROPPED_ITEM_OPACITY = 0.9; // Base opacity for dropped items
+const DROPPED_ITEM_HIGHLIGHT_COLOR = 'rgba(255, 255, 255, 0.3)'; // Highlight color for dropped items
+const DROPPED_ITEM_HIGHLIGHT_THICKNESS = 2; // Thickness of highlight border
 
 // --- Constants --- 
 const DRAW_WIDTH = 48;

@@ -27,6 +27,9 @@ A lightweight 2D multiplayer survival game starter kit built with modern web tec
 *   [🤝 Contributing](#-contributing)
 *   [📜 License](#-license)
 
+## Brief
+We have a twitter community, [Join and vibe the community](https://x.com/i/communities/1925184965865512982).
+
 ## ⚡ Quick Local Setup
 
 For experienced users familiar with Node.js, Rust, and SpacetimeDB. See detailed sections below for troubleshooting or authentication specifics.
@@ -111,6 +114,7 @@ npm run dev
 *   Storage Containers (Chests)
 *   Looting Mechanics (Containers)
 *   Authentication/Account System
+*   Containerization: Docker setup for all services (client, auth server, SpacetimeDB) with docker-compose orchestration
 
 **In Progress (🚧):**
 *   Performance Optimizations: Viewport culling, collision system improvements
