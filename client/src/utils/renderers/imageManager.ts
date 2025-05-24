@@ -1,5 +1,25 @@
 // import { logError, logInfo, logWarn } from './logger'; // Assuming a logger utility exists
 
+// Import all image assets
+import playerImage from '../../assets/player/player.png';
+import playerCorpseImage from '../../assets/player/player_corpse.png';
+import treeImage from '../../assets/doodads/tree.png';
+import campfireImage from '../../assets/doodads/campfire.png';
+import campfireOffImage from '../../assets/doodads/campfire_off.png';
+import woodenStorageBoxImage from '../../assets/doodads/wooden_storage_box.png';
+import stoneImage from '../../assets/doodads/stone.png';
+import cornImage from '../../assets/doodads/corn.png';
+import cloudImage from '../../assets/doodads/cloud.png';
+import sleepingBagImage from '../../assets/doodads/sleeping_bag.png';
+import pumpkinImage from '../../assets/doodads/pumpkin.png';
+
+// Define image loading state type
+type ImageLoadingState = {
+    loaded: boolean;
+    error: boolean;
+    image?: HTMLImageElement;
+};
+
 interface ImageCacheEntry {
     image: HTMLImageElement;
     status: 'loading' | 'loaded' | 'error';

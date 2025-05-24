@@ -1,18 +1,27 @@
-import { PlayerCorpse as SpacetimeDBPlayerCorpse } from '../../generated/player_corpse_type';
+import { PlayerCorpse } from '../../generated';
+import { GroundEntityConfig, renderConfiguredGroundEntity } from './genericGroundRenderer';
+import { imageManager } from './imageManager';
 import { Player as SpacetimeDBPlayer } from '../../generated/player_type';
 import { renderPlayer, IDLE_FRAME_INDEX } from './playerRenderingUtils';
 import { Identity, Timestamp } from '@clockworklabs/spacetimedb-sdk';
+import type { RefObject } from 'react';
 
 interface RenderPlayerCorpseProps {
   ctx: CanvasRenderingContext2D;
-  corpse: SpacetimeDBPlayerCorpse;
+  corpse: PlayerCorpse;
   nowMs: number;
-  itemImagesRef: React.RefObject<Map<string, HTMLImageElement>>;
-  cycleProgress: number;
-  heroImageRef: React.RefObject<HTMLImageElement | null>;
+  itemImagesRef: { current: Map<string, HTMLImageElement> | null };
+  worldScale: number;
+  cameraOffsetX: number;
+  cameraOffsetY: number;
 }
 
 export const PLAYER_CORPSE_INTERACTION_DISTANCE_SQUARED = 64.0 * 64.0;
+
+// Define constants for player corpse rendering
+const CORPSE_OPACITY = 0.8; // Base opacity for player corpses
+const CORPSE_HIGHLIGHT_COLOR = 'rgba(255, 255, 255, 0.3)'; // Highlight color for player corpses
+const CORPSE_HIGHLIGHT_THICKNESS = 2; // Thickness of highlight border
 
 /**
  * Renders a player corpse entity onto the canvas using player sprite logic.
@@ -22,11 +31,12 @@ export function renderPlayerCorpse({
   corpse,
   nowMs,
   itemImagesRef,
-  cycleProgress,
-  heroImageRef,
+  worldScale,
+  cameraOffsetX,
+  cameraOffsetY,
 }: RenderPlayerCorpseProps): void {
   
-  const heroImg = heroImageRef.current;
+  const heroImg = itemImagesRef.current?.get('hero');
   if (!heroImg) {
     console.warn("[renderPlayerCorpse] Hero image not loaded, cannot render corpse sprite.");
     return;

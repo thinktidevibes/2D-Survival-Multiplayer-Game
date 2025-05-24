@@ -1,4 +1,6 @@
 import { Cloud } from '../../generated'; // Import generated types
+import { GroundEntityConfig, renderConfiguredGroundEntity } from './genericGroundRenderer'; // Import generic renderer
+import { imageManager } from './imageManager'; // Import image manager
 import { InterpolatedCloudData } from '../../hooks/useCloudInterpolation'; // <<< Added import
 
 export type { Cloud };
@@ -11,6 +13,12 @@ interface RenderCloudsParams {
   cameraOffsetX: number;
   cameraOffsetY: number;
 }
+
+// Define constants for cloud rendering
+const CLOUD_OPACITY = 0.7; // Base opacity for clouds
+const CLOUD_MOVEMENT_SPEED = 0.2; // Speed at which clouds move
+const CLOUD_SCALE_MIN = 0.8; // Minimum scale for cloud variation
+const CLOUD_SCALE_MAX = 1.2; // Maximum scale for cloud variation
 
 export function renderCloudsDirectly({ ctx, clouds, cloudImages, worldScale }: RenderCloudsParams): void {
   if (!clouds || clouds.size === 0) {

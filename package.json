@@ -26,8 +26,8 @@
   "devDependencies": {
     "@eslint/js": "^9.21.0",
     "@types/jsonwebtoken": "^9.0.9",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
+    "@types/react": "^19.1.5",
+    "@types/react-dom": "^19.1.5",
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.21.0",
     "eslint-plugin-react-hooks": "^5.1.0",

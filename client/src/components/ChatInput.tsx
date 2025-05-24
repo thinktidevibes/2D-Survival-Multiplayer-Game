@@ -32,6 +32,7 @@ const ChatInput = forwardRef<HTMLInputElement, ChatInputProps>(({
       
       return () => clearTimeout(timer);
     }
+    return undefined; // Explicitly return undefined for the non-focus case
   }, [isActive, ref]);
 
   // We'll separate the send message logic from the keyboard event

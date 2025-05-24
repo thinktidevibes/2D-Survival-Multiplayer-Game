@@ -1,10 +1,11 @@
-import { Player as SpacetimeDBPlayer, ItemDefinition as SpacetimeDBItemDefinition, ActiveEquipment as SpacetimeDBActiveEquipment } from '../../generated';
+import { Player as SpacetimeDBPlayer, ItemDefinition as SpacetimeDBItemDefinition, ActiveEquipment as SpacetimeDBActiveEquipment, Campfire as SpacetimeDBCampfire } from '../../generated';
+import { CAMPFIRE_RENDER_Y_OFFSET, CAMPFIRE_HEIGHT } from './campfireRenderingUtils';
 
 // --- Campfire Light Constants (defined locally now) ---
 export const CAMPFIRE_LIGHT_RADIUS_BASE = 150;
-export const CAMPFIRE_FLICKER_AMOUNT = 5; // Max pixels radius will change by
-export const CAMPFIRE_LIGHT_INNER_COLOR = 'rgba(255, 180, 80, 0.35)'; // Warmer orange/yellow, slightly more opaque
-export const CAMPFIRE_LIGHT_OUTER_COLOR = 'rgba(255, 100, 0, 0.0)';  // Fade to transparent orange
+export const CAMPFIRE_FLICKER_AMOUNT = 5;
+export const CAMPFIRE_LIGHT_INNER_COLOR = 'rgba(255, 200, 100, 0.8)';
+export const CAMPFIRE_LIGHT_OUTER_COLOR = 'rgba(255, 200, 100, 0)';
 
 // --- Torch Light Constants (derived from new local Campfire constants) ---
 export const TORCH_LIGHT_RADIUS_BASE = CAMPFIRE_LIGHT_RADIUS_BASE * 0.8;
@@ -75,11 +76,6 @@ interface RenderCampfireLightProps {
     cameraOffsetX: number;
     cameraOffsetY: number;
 }
-
-import { Campfire as SpacetimeDBCampfire } from '../../generated';
-
-// Import the CAMPFIRE_RENDER_Y_OFFSET and CAMPFIRE_HEIGHT for proper alignment
-import { CAMPFIRE_RENDER_Y_OFFSET, CAMPFIRE_HEIGHT } from '../renderers/campfireRenderingUtils';
 
 export const renderCampfireLight = ({
     ctx,

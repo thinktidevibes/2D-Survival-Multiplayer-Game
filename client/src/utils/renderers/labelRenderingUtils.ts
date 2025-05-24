@@ -23,9 +23,17 @@ import {
 
 import { CAMPFIRE_HEIGHT, CAMPFIRE_RENDER_Y_OFFSET } from './campfireRenderingUtils';
 import { BOX_HEIGHT } from './woodenStorageBoxRenderingUtils';
+import { GroundEntityConfig, renderConfiguredGroundEntity } from './genericGroundRenderer';
+import { imageManager } from './imageManager';
 
 // Define Sleeping Bag dimensions locally for label positioning
 const SLEEPING_BAG_HEIGHT = 64;
+
+// Define constants for label rendering
+const LABEL_FONT = '16px Arial';
+const LABEL_COLOR = '#FFFFFF';
+const LABEL_SHADOW_COLOR = 'rgba(0, 0, 0, 0.5)';
+const LABEL_SHADOW_OFFSET = 2;
 
 interface RenderLabelsParams {
     ctx: CanvasRenderingContext2D;
@@ -53,12 +61,6 @@ interface RenderLabelsParams {
     closestInteractableStashId: number | null;
     closestInteractableSleepingBagId: number | null;
 }
-
-const LABEL_FONT = '14px "Press Start 2P", cursive';
-const LABEL_FILL_STYLE = "white";
-const LABEL_STROKE_STYLE = "black";
-const LABEL_LINE_WIDTH = 2;
-const LABEL_TEXT_ALIGN = "center";
 
 /**
  * Renders interaction labels ("Press E...") for the closest interactable objects.
@@ -92,10 +94,10 @@ export function renderInteractionLabels({
     ctx.save(); // Save context state before changing styles
 
     ctx.font = LABEL_FONT;
-    ctx.fillStyle = LABEL_FILL_STYLE;
-    ctx.strokeStyle = LABEL_STROKE_STYLE;
-    ctx.lineWidth = LABEL_LINE_WIDTH;
-    ctx.textAlign = LABEL_TEXT_ALIGN;
+    ctx.fillStyle = LABEL_COLOR;
+    ctx.strokeStyle = LABEL_COLOR;
+    ctx.lineWidth = 2;
+    ctx.textAlign = "center";
 
     // Mushroom Label
     if (closestInteractableMushroomId !== null) {

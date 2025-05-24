@@ -1,0 +1,58 @@
+services:
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - auth-server
+      - spacetime-server
+    networks:
+      game-network:
+        aliases:
+          - client
+
+  auth-server:
+    build:
+      context: ./auth-server-openauth
+      dockerfile: Dockerfile
+    ports:
+      - "4001:4001"
+    volumes:
+      - ./keys:/keys
+      - auth-data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=4001
+      - ISSUER_URL=http://auth-server:4001
+    networks:
+      game-network:
+        aliases:
+          - auth-server
+
+  spacetime-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    # image: clockworklabs/spacetime:latest
+    command: [ "start", "-l", "spacetime-server:3000"]
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./server:/app
+      - ./server/data:/home/spacetime/.local/share/spacetime/data
+    networks:
+      game-network:
+        aliases:
+          - spacetime-server
+
+
+volumes:
+  auth-data:
+  spacetime-data:
+
+networks:
+  game-network:
+    driver: bridge
+    name: vibe-survival

@@ -302,3 +302,10 @@ export function drawDynamicGroundShadow({
 //   ctx.globalAlpha = 1.0; 
 //   ctx.restore();
 // } 
+
+// Define constants for shadow rendering
+const SHADOW_OPACITY = 0.3; // Base opacity for shadows
+const SHADOW_BLUR = 5; // Blur radius for shadows
+const SHADOW_COLOR = 'rgba(0, 0, 0, 0.5)'; // Color for shadows
+const SHADOW_OFFSET_X = 2; // X offset for shadows
+const SHADOW_OFFSET_Y = 4; // Y offset for shadows

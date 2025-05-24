@@ -5,11 +5,11 @@ import {
     ItemDefinition as SpacetimeDBItemDefinition,
 } from '../generated';
 import {
-    CAMPFIRE_LIGHT_RADIUS_BASE, // We can reuse or define new constants for torch
+    CAMPFIRE_LIGHT_RADIUS_BASE,
     CAMPFIRE_FLICKER_AMOUNT,
     CAMPFIRE_LIGHT_INNER_COLOR,
-    CAMPFIRE_LIGHT_OUTER_COLOR,
-} from '../config/gameConfig';
+    CAMPFIRE_LIGHT_OUTER_COLOR
+} from '../utils/renderers/lightRenderingUtils';
 
 // Define specific torch light properties, or reuse campfire ones
 const TORCH_LIGHT_RADIUS_BASE = CAMPFIRE_LIGHT_RADIUS_BASE * 0.8; // Slightly smaller than campfire

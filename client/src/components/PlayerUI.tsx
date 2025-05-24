@@ -14,6 +14,7 @@ import { InteractionTarget } from '../hooks/useInteractionManager';
 // --- NEW IMPORTS ---
 import { NotificationItem } from '../types/notifications';
 import ItemAcquisitionNotificationUI from './ItemAcquisitionNotificationUI';
+import { useAuth } from '../contexts/AuthContext';
 // --- END NEW IMPORTS ---
 
 interface PlayerUIProps {
@@ -82,6 +83,8 @@ const PlayerUI: React.FC<PlayerUIProps> = ({
 
     // Reference to store the previous state of inventory items for comparison
     const prevInventoryRef = useRef<Map<string, InventoryItem>>(new Map());
+
+    const { logout } = useAuth();
 
     // Determine if there's an active health regen effect for the local player
     const isHealthHealingOverTime = React.useMemo(() => {
@@ -395,6 +398,27 @@ const PlayerUI: React.FC<PlayerUIProps> = ({
     return (
       // <DndContext...> // Remove wrapper
         <>
+            {/* Sign Out Button - Fixed Top Right */}
+            <button
+                onClick={logout}
+                style={{
+                    position: 'fixed',
+                    top: '15px',
+                    right: '15px',
+                    zIndex: 200,
+                    background: '#444',
+                    color: 'white',
+                    border: '1px solid #888',
+                    borderRadius: '4px',
+                    padding: '8px 16px',
+                    fontFamily: '"Press Start 2P", cursive',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    boxShadow: '2px 2px 0px rgba(0,0,0,0.5)',
+                }}
+            >
+                Sign Out
+            </button>
             {/* --- NEW: Render Item Acquisition Notifications --- */}
             <ItemAcquisitionNotificationUI notifications={acquisitionNotifications.slice(-MAX_NOTIFICATIONS_DISPLAYED)} />
             {/* --- END NEW --- */}

@@ -8,6 +8,11 @@ import { GroundEntityConfig, renderConfiguredGroundEntity } from './genericGroun
 import { applyStandardDropShadow } from './shadowUtils';
 import { imageManager } from './imageManager';
 
+// Define constants for stash rendering
+const STASH_OPACITY = 0.8; // Base opacity for stashes
+const STASH_HIGHLIGHT_COLOR = 'rgba(255, 255, 255, 0.3)'; // Highlight color for stashes
+const STASH_HIGHLIGHT_THICKNESS = 2; // Thickness of highlight border
+
 // --- Constants ---
 export const STASH_WIDTH = 48; // Adjust as needed
 export const STASH_HEIGHT = 48; // Adjust as needed

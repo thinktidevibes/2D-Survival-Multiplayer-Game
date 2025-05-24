@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGameViewport } from './useGameViewport';
-import { Message as SpacetimeDBMessage, Player as SpacetimeDBPlayer } from '../generated';
+import { Player as SpacetimeDBPlayer } from '../generated';
 
 interface SpeechBubbleManagerHookResult {
   cameraOffsetX: number;

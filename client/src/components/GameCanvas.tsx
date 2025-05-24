@@ -372,7 +372,6 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
   const campfireParticles = useCampfireParticles({
     visibleCampfiresMap,
     deltaTime,
-    damagingCampfireIds,
   });
   const torchParticles = useTorchParticles({
     players,
@@ -564,7 +563,23 @@ const GameCanvas: React.FC<GameCanvasProps> = ({
                hoveredPlayerIds,
                onPlayerHover: handlePlayerHover,
                cycleProgress: currentCycleProgress,
-               renderPlayerCorpse: (props) => renderPlayerCorpse({...props, cycleProgress: currentCycleProgress, heroImageRef: heroImageRef })
+               renderPlayerCorpse: (props) => {
+                   // First cast to unknown, then to PlayerCorpse to satisfy TypeScript
+                   const corpse = props as unknown as SpacetimeDBPlayerCorpse;
+                   if (!corpse || typeof corpse !== 'object') {
+                       console.error('[GameCanvas] Invalid corpse data:', props);
+                       return null;
+                   }
+                   return renderPlayerCorpse({
+                       ctx,
+                       corpse,
+                       nowMs: corpse.deathTime ? Number(corpse.deathTime.microsSinceUnixEpoch / 1000n) : now_ms,
+                       itemImagesRef,
+                       worldScale: 1,
+                       cameraOffsetX,
+                       cameraOffsetY
+                   });
+               }
            });
         }
     });
