@@ -36,15 +36,26 @@ const SALT_ROUNDS = Number(process.env.BCRYPT_ROUNDS) || 12;
 // const JWT_SECRET  = process.env.JWT_SECRET || 'dev-secret'; // No longer used
 const CLIENT_ID   = 'vibe-survival-game-client';
 
+// Allowed redirect URIs for OIDC flows
+const ALLOWED_REDIRECT_URIS = [
+  'https://play.vibesurvival.fun/callback'
+];
+
 // Load the private key for signing JWTs
 let privateKey: string;
 let jwksPublicKey: jose.KeyObject; // Changed from KeyLike to KeyObject
 let jwksPublicJWK: jose.JWK;     // Store public key as plain JWK object
 const keyId = 'auth-server-signing-key'; // An identifier for our key
+const KEY_DIR = process.env.KEY_DIR || '/app/keys'; // Default to /keys for Docker/K8s, override for local dev
+
+// Add debug logging before reading keys
+console.log('KEY_DIR:', KEY_DIR);
+console.log('private.pem exists:', fsSync.existsSync(path.resolve(KEY_DIR, 'private.pem')));
+console.log('public.pem exists:', fsSync.existsSync(path.resolve(KEY_DIR, 'public.pem')));
 
 try {
-    privateKey = fsSync.readFileSync(path.resolve(__dirname, '/keys/private.pem'), 'utf8');
-    const publicKeyPem = fsSync.readFileSync(path.resolve(__dirname, '/keys/public.pem'), 'utf8');
+    privateKey = fsSync.readFileSync(path.resolve(KEY_DIR, 'private.pem'), 'utf8');
+    const publicKeyPem = fsSync.readFileSync(path.resolve(KEY_DIR, 'public.pem'), 'utf8');
     // Import public key for JWKS endpoint using jose
     jwksPublicKey = await jose.importSPKI(publicKeyPem, 'RS256');
     // Export to JWK format for the response body
@@ -237,7 +248,7 @@ async function success(ctx: any, value: any): Promise<Response> {
   // --- CORS Middleware --- 
   // Allow requests from your client origins
   app.use('*', cors({ 
-      origin: ['http://localhost', 'http://localhost:80', 'http://localhost:3008', 'http://localhost:3009'], // Added localhost and localhost:80
+      origin: ['http://localhost', 'http://localhost:80', 'http://localhost:3008', 'https://play.vibesurvival.fun'], // Added localhost and localhost:80
       allowMethods: ['GET', 'POST', 'OPTIONS'], // Allow needed methods
       allowHeaders: ['Content-Type', 'Authorization'], // Allow needed headers (adjust if necessary)
       credentials: true, // Allow cookies/credentials if needed later
@@ -248,8 +259,8 @@ async function success(ctx: any, value: any): Promise<Response> {
       console.log('[OIDC Discovery] Serving configuration');
       return c.json({
           issuer: ISSUER_URL,
-          authorization_endpoint: `${ISSUER_URL}/authorize`, // Where client initiates flow
-          token_endpoint: `${ISSUER_URL}/token`,           // Where client exchanges code
+          authorization_endpoint: `${ISSUER_URL}/openauth/authorize`, // Updated path
+          token_endpoint: `${ISSUER_URL}/token`,           // Keep our manual token endpoint
           jwks_uri: `${ISSUER_URL}/.well-known/jwks.json`, // Location of public keys
           response_types_supported: ["code"],            // We support the Authorization Code flow
           subject_types_supported: ["public"],
@@ -278,41 +289,28 @@ async function success(ctx: any, value: any): Promise<Response> {
   });
 
   // --- Custom Authorize Interceptor --- 
-  app.get('/authorize', async (c, next) => {
+  app.get('/openauth/authorize', async (c, next) => {
       const query = c.req.query();
       const acrValues = query['acr_values'];
 
       if (acrValues === 'pwd') {
           // Handle password flow manually: Redirect to our custom login page
-          console.log('[AuthServer] Intercepting /authorize for password flow (acr_values=pwd). Redirecting to /auth/password/login');
+          console.log('[AuthServer] Intercepting /openauth/authorize for password flow (acr_values=pwd). Redirecting to /auth/password/login');
           
           // Use relative URL for redirect
-          const loginUrl = new URL('/auth/password/login', 'http://localhost'); 
+          const loginUrl = new URL('/auth/password/login', 'https://play.vibesurvival.fun'); 
           Object.keys(query).forEach(key => {
               loginUrl.searchParams.set(key, query[key]);
           });
           
           // Extract just the path and query string for the redirect
           return c.redirect(loginUrl.pathname + loginUrl.search, 302);
-      } else {
-          // For any other flow (or if acr_values is missing), let the issuer handle it.
-          console.log('[AuthServer] /authorize request is not for password flow (acr_values != \'pwd\') or acr_values missing. Passing to issuer.');
-          // In Hono v3/v4, just calling next() should pass control if the issuer is mounted on '/'
-          // However, since issuer is mounted on '/', it might intercept anyway.
-          // If this doesn't work, we might need to only mount specific issuer routes, not all of '/'.
-          // For now, let's explicitly return and let the issuer handle it via its own routing.
-          // A cleaner way would be conditional mounting or more specific routes for the issuer.
-          // Let's assume for now the issuer WILL pick it up if we don't handle it.
-          await next(); 
-          // If next() didn't implicitly fall through to the issuer mounted on '/', 
-          // we might get a 404 here if no other route matches.
-          if (!c.res.bodyUsed) {
-              // If next() didn't result in a response, explicitly indicate not found or pass to a generic handler
-              console.warn('[AuthServer] /authorize interceptor: next() called but no response generated. Potential issue with issuer routing.');
-              // return c.notFound(); // Or let it fall through if issuer might still catch it
-          }
-          // No explicit return here, allowing potential fallthrough or next middleware response
-
+      }
+      // For any other flow (or if acr_values is missing), let the issuer handle it.
+      console.log('[AuthServer] /openauth/authorize request is not for password flow (acr_values != \'pwd\') or acr_values missing. Passing to issuer.');
+      await next(); 
+      if (!c.res.bodyUsed) {
+          console.warn('[AuthServer] /openauth/authorize interceptor: next() called but no response generated. Potential issue with issuer routing.');
       }
   });
 
@@ -324,7 +322,7 @@ async function success(ctx: any, value: any): Promise<Response> {
         .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
         .join('&');
     
-    const redirect_uri = query['redirect_uri'] || '';
+    const redirect_uri = query['redirect_uri'] || 'https://play.vibesurvival.fun/callback';
     const state = query['state'] || '';
     const code_challenge = query['code_challenge'] || '';
     const code_challenge_method = query['code_challenge_method'] || 'S256'; // Default to S256
@@ -445,7 +443,7 @@ async function success(ctx: any, value: any): Promise<Response> {
             <div class="subtitle">2D Survival Multiplayer</div>
             <h1>Create Account</h1>
             <form method="post">
-                <input type="hidden" name="redirect_uri" value="${encodeURIComponent(redirect_uri)}">
+                <input type="hidden" name="redirect_uri" value="${redirect_uri}">
                 <input type="hidden" name="state" value="${state || ''}">
                 <input type="hidden" name="code_challenge" value="${code_challenge}">
                 <input type="hidden" name="code_challenge_method" value="${code_challenge_method}">
@@ -494,6 +492,10 @@ async function success(ctx: any, value: any): Promise<Response> {
             const decoded_once = decodeURIComponent(redirect_uri_from_form);
             redirect_uri = decodeURIComponent(decoded_once);
             console.log(`[AuthServer] POST Register: Decoded redirect_uri: ${redirect_uri}`);
+            if (!ALLOWED_REDIRECT_URIS.includes(redirect_uri)) {
+              console.error('[AuthServer] POST Register: Invalid redirect_uri:', redirect_uri);
+              return c.text('Invalid redirect URI provided.', 400);
+            }
         } catch (e) {
             console.error('[AuthServer] POST Register: Failed to double-decode redirect_uri:', redirect_uri_from_form, e);
             return c.text('Invalid redirect URI encoding.', 400);
@@ -554,7 +556,7 @@ async function success(ctx: any, value: any): Promise<Response> {
         <!-- <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet"> -->
         <style>
             body { display: flex; justify-content: center; align-items: center; min-height: 100vh; width: 100%; margin: 0; background-color: #1a1a2e; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; color: white; }\n            .container { background-color: rgba(40, 40, 60, 0.85); padding: 40px; border-radius: 4px; border: 1px solid #a0a0c0; box-shadow: 2px 2px 0px rgba(0,0,0,0.5); text-align: center; min-width: 400px; max-width: 500px; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }\n            .logo-text { font-size: 24px; margin-bottom: 10px; color: #e0e0e0; }\n            .subtitle { font-size: 14px; margin-bottom: 30px; color: #b0b0c0; }\n            h1 { margin-bottom: 25px; font-weight: normal; font-size: 20px; }\n            label { display: block; margin-bottom: 8px; font-size: 12px; text-align: left; color: #d0d0d0; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; }\n            input[type="email"], input[type="password"] { padding: 10px; margin-bottom: 20px; border: 1px solid #a0a0c0; background-color: #333; color: white; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; font-size: 14px; display: block; width: calc(100% - 22px); text-align: center; box-sizing: border-box; border-radius: 2px; }\n            button[type="submit"] { padding: 12px 20px; border: 1px solid #a0a0c0; background-color: #777; color: white; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif; font-size: 14px; cursor: pointer; box-shadow: 2px 2px 0px rgba(0,0,0,0.5); /* width: 100%; */ display: inline-block; box-sizing: border-box; margin-bottom: 20px; text-transform: uppercase; border-radius: 2px; }\n            button[type="submit"]:hover { background-color: #888; }\n            .form-link { font-size: 12px; color: #ccc; }\n            .form-link a { color: #fff; text-decoration: underline; }\n            .form-link a:hover { color: #a0a0c0; }\n            hr { border: none; border-top: 1px solid #555; margin-top: 25px; margin-bottom: 25px; }\n        </style>\n    </head>\n    <body>\n        <div class="container">\n            <div class="logo-text">${githubLogoPlaceholder}</div>\n            <div class="subtitle">2D Survival Multiplayer</div>\n            <h1>Login</h1>\n            <form method="post">
-                <input type="hidden" name="redirect_uri" value="${encodeURIComponent(redirect_uri)}">
+                <input type="hidden" name="redirect_uri" value="${redirect_uri}">
                 <input type="hidden" name="state" value="${state || ''}">
                 <input type="hidden" name="code_challenge" value="${code_challenge}">
                 <input type="hidden" name="code_challenge_method" value="${code_challenge_method}">
@@ -588,6 +590,10 @@ async function success(ctx: any, value: any): Promise<Response> {
               const decoded_once = decodeURIComponent(redirect_uri_from_form);
               redirect_uri = decodeURIComponent(decoded_once);
               console.log(`[AuthServer] POST Login: Decoded redirect_uri: ${redirect_uri}`);
+              if (!ALLOWED_REDIRECT_URIS.includes(redirect_uri)) {
+                console.error('[AuthServer] POST Login: Invalid redirect_uri:', redirect_uri);
+                return c.text('Invalid redirect URI provided.', 400);
+              }
           } catch (e) {
               console.error('[AuthServer] POST Login: Failed to double-decode redirect_uri:', redirect_uri_from_form, e);
               return c.text('Invalid redirect URI encoding.', 400);
@@ -697,8 +703,54 @@ async function success(ctx: any, value: any): Promise<Response> {
         // subject: userId        // REMOVED: Already in payload
     };
 
+    // Add detailed logging before signing
+    console.log('[Token Endpoint] About to sign token. Checking key status:');
+    console.log('- KEY_DIR:', KEY_DIR);
+    console.log('- private.pem exists:', fsSync.existsSync(path.resolve(KEY_DIR, 'private.pem')));
+    console.log('- private.pem readable:', fsSync.accessSync(path.resolve(KEY_DIR, 'private.pem'), fsSync.constants.R_OK) === undefined);
+    try {
+        const keyStats = fsSync.statSync(path.resolve(KEY_DIR, 'private.pem'));
+        console.log('- private.pem stats:', { 
+            size: keyStats.size, 
+            mode: keyStats.mode.toString(8), 
+            uid: keyStats.uid, 
+            gid: keyStats.gid 
+        });
+    } catch (e) {
+        console.error('- Error getting private.pem stats:', e);
+    }
+
     // Sign the ID token
-    const idToken = jwt.sign(payload, privateKey, signOptions);
+    let idToken: string;
+    try {
+        idToken = jwt.sign(payload, privateKey, signOptions);
+        console.log('[Token Endpoint] Token signed successfully.');
+        
+        // Add detailed token inspection
+        const tokenParts = idToken.split('.');
+        if (tokenParts.length === 3) {
+            const header = JSON.parse(Buffer.from(tokenParts[0], 'base64url').toString());
+            console.log('[Token Endpoint] Token header:', {
+                alg: header.alg,
+                kid: header.kid,
+                typ: header.typ
+            });
+        } else {
+            console.error('[Token Endpoint] Token does not have expected JWT format');
+        }
+    } catch (e) {
+        console.error('[Token Endpoint] Error signing token:', e);
+        // If the error is ENOENT, log additional details
+        if (e instanceof Error && e.message.includes('ENOENT')) {
+            console.error('[Token Endpoint] ENOENT during signing. Current process info:', {
+                pid: process.pid,
+                uid: process.getuid?.(),
+                gid: process.getgid?.(),
+                cwd: process.cwd()
+            });
+        }
+        return c.text('Internal server error during token signing', 500);
+    }
 
     // For OpenID Connect, usually the id_token is sufficient. 
     // If you need a separate access_token (e.g., for resource servers), 
@@ -736,7 +788,7 @@ async function success(ctx: any, value: any): Promise<Response> {
 
   // Mount the OpenAuth issuer routes AFTER your manual routes AND the interceptor
   // Note: Mounting on '/' might still cause conflicts if the issuer internally registers /authorize.
-  app.route('/', auth);
+  app.route('/openauth', auth);
   app.get('/health', c => c.text('OK'));
 
   console.log(`🚀 Auth server → ${ISSUER_URL}`);
