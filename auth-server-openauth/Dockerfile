@@ -13,7 +13,7 @@ RUN npm install
 COPY . .
 
 # Create directory for keys and data
-RUN mkdir -p /app/keys /app/data
+# RUN mkdir -p /app/keys /app/data
 # COPY /keys /app/keys
 
 # Set environment variables
@@ -24,7 +24,7 @@ ENV PORT=4001
 EXPOSE 4001
 
 # The keys will be mounted at runtime
-# VOLUME ["/app/keys", "/app/data"]
+# VOLUME ["/app/keys"]
 
 # Start the server using tsx (which handles TypeScript directly)
 CMD ["npx", "tsx", "index.ts"] 

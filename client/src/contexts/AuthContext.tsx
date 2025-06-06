@@ -7,7 +7,7 @@ import { parseJwt } from '../utils/auth/jwt'; // Corrected import path
 // import crypto from 'crypto'; 
 
 // --- Configuration ---
-const AUTH_SERVER_URL = 'http://localhost:4001';
+const AUTH_SERVER_URL = 'https://auth.vibesurvival.fun';
 const OIDC_CLIENT_ID = 'vibe-survival-game-client'; // An identifier for this React app
 const REDIRECT_URI = window.location.origin + '/callback'; // Where OpenAuth redirects back after login
 const LOCAL_STORAGE_KEYS = {

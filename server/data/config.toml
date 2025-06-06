@@ -12,8 +12,8 @@ directives = [
 [auth]
 [[identity_provider]]
 type     = "oidc"
-issuer   = "http://localhost:4001" # URL of our OpenAuth server
+issuer   = "https://auth.vibesurvival.fun" # URL of our OpenAuth server
 # SpacetimeDB will fetch keys from /.well-known/jwks.json at the issuer URL
 # algorithm = "RS256" # Typically inferred from JWKS, uncomment if needed
-jwks_uri = "http://localhost:4001/.well-known/jwks.json" # Explicitly point to the JWKS endpoint
+jwks_uri = "https://auth.vibesurvival.fun/.well-known/jwks.json" # Explicitly point to the JWKS endpoint
 audience = "vibe-survival-game-client" # Explicitly set the expected audience

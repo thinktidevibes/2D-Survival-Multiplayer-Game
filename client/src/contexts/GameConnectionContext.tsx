@@ -4,7 +4,7 @@ import { DbConnection } from '../generated';
 import { useAuth } from './AuthContext'; // Import useAuth
 
 // SpacetimeDB connection parameters (Should move to a config later)
-const SPACETIME_DB_ADDRESS = 'ws://localhost:3000';
+const SPACETIME_DB_ADDRESS = 'wss://spacetime.vibesurvival.fun';
 const SPACETIME_DB_NAME = 'vibe-survival-game';
 
 // Define the connection context state type
