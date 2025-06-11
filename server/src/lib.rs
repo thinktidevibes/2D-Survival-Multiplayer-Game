@@ -213,6 +213,9 @@ pub struct ClientViewport {
 pub fn init_module(ctx: &ReducerContext) -> Result<(), String> {
     log::info!("Initializing module...");
 
+    // Seed the world state first since other systems depend on it
+    crate::world_state::seed_world_state(ctx)?;
+
     // Initialize the dropped item despawn schedule
     crate::dropped_item::init_dropped_item_schedule(ctx)?;
     // Initialize the crafting finish check schedule

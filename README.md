@@ -28,7 +28,7 @@ A lightweight 2D multiplayer survival game starter kit built with modern web tec
 *   [📜 License](#-license)
 
 ## Brief
-We have a twitter community, [Join and vibe the community](https://x.com/i/communities/1925184965865512982).
+We have a twitter community, [Join and vibe the community](https://x.com/i/communities/1930697416766103686).
 
 ## ⚡ Quick Local Setup
 
